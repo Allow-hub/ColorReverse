@@ -1,0 +1,166 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace TechC
+{
+    public class GameManager : Singleton<GameManager>
+    {
+        [Header("Reference")]
+        [SerializeField] private LevelManager levelManager;
+
+
+        [Header("GameSettings")]
+        [SerializeField] private int life = 3;
+
+        [SerializeField] private int maxLevel = 5; //マックスの難易度
+        [SerializeField] private int score;
+
+        [SerializeField] private int targetFrameRate = 144;
+
+        public int colorRow = 0;
+
+        private int currentLevel;
+
+        public enum GameState
+        {
+            Title,
+            PlayMode,
+            NextLevel,
+            Menu,
+            Clear,
+            GameOver
+        }
+        public GameState currentState = GameState.Title;
+        protected override void Init()
+        {
+            base.Init();
+
+            // VSyncCount を Dont Sync に変更
+            QualitySettings.vSyncCount = 0;
+
+            // fps 144 を目標に設定
+            Application.targetFrameRate = targetFrameRate;
+            SetState(GameState.NextLevel);
+        }
+
+        private void Update()
+        {
+            StateHandler();
+        }
+
+        private void SetState(GameState state)
+        {
+            currentState = state;
+            switch (state)
+            {
+                case GameState.Title:
+                    TitleInit();
+                    break;
+                case GameState.PlayMode:
+                    PlayModeInit();
+                    break;
+                case GameState.NextLevel:
+                    NextLevelInit();
+                    break;
+                case GameState.Clear:
+                    ClearInit();
+                    break;
+                case GameState.GameOver:
+                    GameOverInit();
+                    break;
+                case GameState.Menu:
+                    MenuInit();
+                    break;
+            }
+        }
+
+        private void StateHandler()
+        {
+            switch (currentState)
+            {
+                case GameState.Title:
+                    Title();
+                    break;
+                case GameState.PlayMode:
+                    PlayMode();
+                    break;
+                case GameState.NextLevel:
+                    NextLevel();
+                    break;
+                case GameState.Clear:
+                    Clear();
+                    break;
+                case GameState.GameOver:
+                    GameOver();
+                    break;
+                case GameState.Menu:
+                    Menu();
+                    break;
+            }
+        }
+
+
+        public void AddScore(int value) => score += value;
+        public int GetScore() => score;
+        private void TitleInit()
+        {
+            score = 0;  
+        }
+        private void NextLevelInit()
+        {
+            currentLevel++;
+        }
+        private void PlayModeInit() { }
+        private void ClearInit() { }
+        private void GameOverInit() { }
+        private void MenuInit() { }
+
+
+        private void Title() { }
+        private void NextLevel() { }
+        private void PlayMode() { }
+        private void Clear() { }
+        private void GameOver() { }
+        private void Menu() { }
+
+        public int GetCurrentLevel() => currentLevel;
+
+        // 非同期でシーンをロード
+        public void LoadSceneAsync(int sceneIndex)
+        {
+            StartCoroutine(LoadSceneCoroutine(sceneIndex));
+        }
+
+        // 非同期でシーンをロードするコルーチン
+        private IEnumerator LoadSceneCoroutine(int sceneIndex)
+        {
+            AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneIndex);
+            asyncOperation.allowSceneActivation = false;
+
+            // シーンのロードが終わるまで待機
+            while (!asyncOperation.isDone)
+            {
+                // ロードが進んだら進行状況を表示
+                float progress = Mathf.Clamp01(asyncOperation.progress / 0.9f);
+                Debug.Log("Loading progress: " + (progress * 100) + "%");
+
+                // ロードが完了したらシーンをアクティブ化
+                if (asyncOperation.progress >= 0.9f)
+                {
+                    asyncOperation.allowSceneActivation = true;
+                }
+
+                yield return null;
+            }
+        }
+
+        public void ChangeTitleState() => SetState(GameState.Title);
+        public void ChangeMenuState() => SetState(GameState.Menu);
+        public void ChangePlayModeState() => SetState(GameState.PlayMode);
+        public void ChangeNextLevelState() => SetState(GameState.NextLevel);
+        public void ChangeClearState() => SetState(GameState.Clear);
+        public void ChangeGameOverState() => SetState(GameState.GameOver);
+    }
+}
