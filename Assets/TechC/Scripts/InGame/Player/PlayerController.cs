@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
 
 namespace TechC
 {
@@ -15,10 +17,16 @@ namespace TechC
         [SerializeField] private Animator anim;
         [SerializeField] private ColorPalette palette;    
         [SerializeField] private LevelManager levelManager;
+        [SerializeField] private ObjectPool objectPool;
 
         [SerializeField] private Texture2D customCursor;  // カスタムカーソル
         [SerializeField] private GameObject mouseObj;     // マウスオブジェクト
         [SerializeField] private LayerMask raycastLayer;  // レイキャスト対象のレイヤー
+        [SerializeField] private GameObject scoreTextPrefab;
+        [SerializeField] private Vector2 xRange;
+        [SerializeField] private Vector2 yRange;
+        //private List<GameObject> scoreText=new List<GameObject>();
+        //private const int scoreTextIndex = 0;
         private GameObject lastHitObject = null; 
 
 
@@ -43,6 +51,8 @@ namespace TechC
         }
 
         [SerializeField] private float distance = 1000;
+
+
         private void Awake()
         {
             // カスタムカーソルを設定
@@ -59,7 +69,7 @@ namespace TechC
             Cursor.lockState = CursorLockMode.Confined;
 
         }
-
+    
 
         private void Update()
         {
@@ -177,7 +187,8 @@ namespace TechC
 
         private void HitEvent(string tag, GameObject hitObj)
         {
-            GameManager.I.AddScore(addColorChangeScore); 
+            GameManager.I.AddScore(addColorChangeScore);
+            AppearScoreText(mouseObj.transform, addColorChangeScore);
             System.Random random = new System.Random();
             Array enumValues = Enum.GetValues(typeof(AnimationType));
 
@@ -227,8 +238,33 @@ namespace TechC
                 if(colorColumn !=currentColorColumn)return;
                 hitObjects.Add(other.gameObject);
                 GameManager.I.AddScore(addGimmickScore);
+                AppearScoreText(mouseObj.transform,addGimmickScore);
             }
         }
+
+        private void AppearScoreText(Transform pos, int score)
+        {
+            // プレイヤーの位置から半径3m以内のランダムなオフセットを生成
+            //Vector3 randomOffset = new Vector3(
+            //    UnityEngine.Random.Range(xRange.x, xRange.y),
+                                  
+            //    UnityEngine.Random.Range(yRange.x, yRange.y) ,
+            //    pos.position.z
+            //);
+
+            // プレイヤーの位置にランダムなオフセットを加える
+            //Vector3 randomPosition = pos.position + randomOffset;
+
+            // オブジェクトプールからスコアテキストオブジェクトを取得
+            GameObject scoreObj = objectPool.GetObject(scoreTextPrefab);
+            scoreObj.transform.position = pos.position ;  // ランダムな位置に設定
+            Debug.Log(scoreObj);
+            // スコアテキストを設定
+            ScoreText scoreText = scoreObj.GetComponent<ScoreText>();
+            scoreText.SetText(score.ToString());
+        }
+
+
 
     }
 }

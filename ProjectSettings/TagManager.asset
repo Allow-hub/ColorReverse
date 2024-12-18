@@ -6,6 +6,7 @@ TagManager:
   tags:
   - ColorImage
   - Gimmick
+  - ObjectPool
   layers:
   - Default
   - TransparentFX
