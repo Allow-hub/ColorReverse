@@ -258,7 +258,6 @@ namespace TechC
             // オブジェクトプールからスコアテキストオブジェクトを取得
             GameObject scoreObj = objectPool.GetObject(scoreTextPrefab);
             scoreObj.transform.position = pos.position ;  // ランダムな位置に設定
-            Debug.Log(scoreObj);
             // スコアテキストを設定
             ScoreText scoreText = scoreObj.GetComponent<ScoreText>();
             scoreText.SetText(score.ToString());

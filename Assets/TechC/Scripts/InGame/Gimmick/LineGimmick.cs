@@ -6,6 +6,8 @@ namespace TechC
 {
     public class LineGimmick : MonoBehaviour
     {
+        [SerializeField] private ObjectPool objectPool;
+
         [SerializeField] private ColorPalette colorPalette;
         [SerializeField] private GameObject pointParent;
         [SerializeField] private GameObject lineParent;
@@ -110,7 +112,7 @@ namespace TechC
             {
                 if (obj != null)
                 {
-                    obj.SetActive(false);
+                    objectPool.ReturnObject(obj);
                 }
             }
             activeObj.Clear();
