@@ -13,4 +13,26 @@ MonoBehaviour:
   m_Name: Level_3
   m_EditorClassIdentifier: 
   levelName: Level_3
-  gimmicks: []
+  activeColor: 6
+  gimmicks:
+  - type: 1
+    speed: 300
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 1
+    delay: 0
+    colorColumn: 1
+  - type: 0
+    speed: 300
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 1
+    delay: 0.5
+    colorColumn: 5
+  - type: 0
+    speed: 300
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 1
+    delay: 1
+    colorColumn: 5

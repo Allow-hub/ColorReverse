@@ -40,7 +40,7 @@ namespace TechC
         private void Start()
         {
             if (GameManager.I == null) return;
-            paletteRow =GameManager.I.colorRow;
+            paletteRow = GameManager.I.colorRow;
         }
         private void Update()
         {
@@ -65,14 +65,16 @@ namespace TechC
                     ChangeLevel_5State();
                     break;
             }
-            lastLevel = GameManager.I.GetCurrentLevel();
-            levelText.text = currentLevel.ToString();
             changeLevelAnimation.StartChangeLevelAnim(currentLevel);
+            lastLevel = GameManager.I.GetCurrentLevel();
+
         }
 
         private void SetState(Level level)
         {
             currentLevel = level;
+            levelText.text = currentLevel.ToString();
+
             switch (currentLevel)
             {
                 case Level.Level_1:
@@ -141,8 +143,11 @@ namespace TechC
                     gimmick.isRandomColor
                 );
             }
-        }
+            yield return new WaitForSeconds(5f);
 
+            lineGimmick.InitGimmick();
+            MoveToNextState();
+        }
 
 
         private void Level_1Init()
@@ -155,20 +160,19 @@ namespace TechC
 
         private void Level_2Init()
         {
-            Debug.Log("Initializing Level 2...");
-            // レベル2の初期化処理
+            StartLevel(GameManager.I.GetCurrentLevel());
+
         }
 
         private void Level_3Init()
         {
-            Debug.Log("Initializing Level 3...");
-            // レベル3の初期化処理
+            StartLevel(GameManager.I.GetCurrentLevel());
+
         }
 
         private void Level_4Init()
         {
-            Debug.Log("Initializing Level 4...");
-            // レベル4の初期化処理
+            StartLevel(GameManager.I.GetCurrentLevel());
         }
 
         private void Level_5Init()
@@ -176,7 +180,14 @@ namespace TechC
             Debug.Log("Initializing Level 5...");
             // レベル5の初期化処理
         }
-
+        private void SetActiveColors(int startColumn, int count)
+        {
+            activeColor.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                activeColor.Add(new Vector2(paletteRow, startColumn + i));
+            }
+        }
         private void Level_1()
         {
             Debug.Log("Executing Level 1 logic...");
@@ -206,11 +217,34 @@ namespace TechC
             Debug.Log("Executing Level 5 logic...");
             // レベル5のステート処理
         }
+        private void MoveToNextState()
+        {
+            // 現在のレベルを次のレベルに移行
+            switch (currentLevel)
+            {
+                case Level.Level_1:
+                    ChangeLevel_2State();
+                    break;
+                case Level.Level_2:
+                    ChangeLevel_3State();
+                    break;
+                case Level.Level_3:
+                    ChangeLevel_4State();
+                    break;
+                case Level.Level_4:
+                    ChangeLevel_5State();
+                    break;
+                case Level.Level_5:
+                    Debug.Log("All levels completed!");
+                    break;
+            }
+        }
 
         private void ChangeLevel_1State() => SetState(Level.Level_1);
         private void ChangeLevel_2State() => SetState(Level.Level_2);
         private void ChangeLevel_3State() => SetState(Level.Level_3);
         private void ChangeLevel_4State() => SetState(Level.Level_4);
         private void ChangeLevel_5State() => SetState(Level.Level_5);
+
     }
 }

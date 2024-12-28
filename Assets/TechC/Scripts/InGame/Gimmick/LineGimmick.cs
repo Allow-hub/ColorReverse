@@ -112,7 +112,7 @@ namespace TechC
             {
                 if (obj != null)
                 {
-                    objectPool.ReturnObject(obj);
+                    obj.SetActive(false);
                 }
             }
             activeObj.Clear();
