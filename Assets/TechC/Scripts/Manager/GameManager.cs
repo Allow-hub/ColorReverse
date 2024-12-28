@@ -111,6 +111,7 @@ namespace TechC
         private void NextLevelInit()
         {
             currentLevel++;
+            ChangePlayModeState();
         }
         private void PlayModeInit() { }
         private void ClearInit() { }

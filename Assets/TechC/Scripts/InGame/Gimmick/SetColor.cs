@@ -18,17 +18,24 @@ namespace TechC
         private BoxCollider boxCollider;
         private Image image;
 
-        private void Start ()
+        private void Awake ()
         {
+            palette = FindAnyObjectByType<ColorPalette>();
+            rect = GetComponent<RectTransform>();
+            image = GetComponent<Image>();
+        }
+        private void Start()
+        {
+
             if (isGimmick) return;
             paletteRow = GameManager.I.colorRow;
             image.color = palette.colors[paletteRow].colors[paletteColumn];
-
         }
 
         private void OnValidate()
         {
             palette = FindAnyObjectByType<ColorPalette>();
+            if(palette ==null) return;  
             image = GetComponent<Image>();
             image.color = palette.colors[paletteRow].colors[paletteColumn];
 

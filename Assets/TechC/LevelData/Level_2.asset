@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level_2
   m_EditorClassIdentifier: 
   levelName: Level_2
-  activeColor: 3
+  activeColor: 6
   gimmicks:
   - type: 1
     speed: 300
@@ -21,7 +21,7 @@ MonoBehaviour:
     direction: {x: 0, y: -1}
     isRandomColor: 1
     delay: 0
-    colorColumn: 1
+    colorColumn: 6
   - type: 0
     speed: 300
     initPointNum: 4

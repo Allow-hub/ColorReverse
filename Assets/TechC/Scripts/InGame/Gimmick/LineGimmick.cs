@@ -7,16 +7,16 @@ namespace TechC
     public class LineGimmick : MonoBehaviour
     {
         [SerializeField] private ObjectPool objectPool;
+        [SerializeField] private LevelManager levelManager;
+        [SerializeField] private LevelCollection levelCollection;
 
         [SerializeField] private ColorPalette colorPalette;
         [SerializeField] private GameObject pointParent;
         [SerializeField] private GameObject lineParent;
         [SerializeField] private GameObject circleParent;
 
-        [SerializeField] private RectTransform[] linesRect;
-        [SerializeField] private RectTransform[] circlesRect;
-        [SerializeField] private GameObject[] linesObj;
-        [SerializeField] private GameObject[] circlesObj;
+        [SerializeField] private GameObject lineObj;
+        [SerializeField] private GameObject circleObj;
 
         [SerializeField] private RectTransform[] points;
 
@@ -24,8 +24,6 @@ namespace TechC
 
         private List<GameObject> activeObj = new List<GameObject>();
         private GameObject lastObj;
-        private int lineIndex = 0;
-        private int circleIndex = 0;
         public enum ObjType
         {
             Line,
@@ -35,11 +33,9 @@ namespace TechC
         private void OnValidate()
         {
             points = GetAllRectTransforms(pointParent);
-            linesRect = GetAllRectTransforms(lineParent);
-            linesObj = GetGameObjects(lineParent, true);
-            circlesRect = GetAllRectTransforms(circleParent);
-            circlesObj = GetGameObjects(circleParent,true);
         }
+
+
 
         private RectTransform[] GetAllRectTransforms(GameObject parent)
         {
@@ -77,7 +73,7 @@ namespace TechC
             return objects.ToArray();
         }
 
-        public void ShotGimmick(ObjType type, float speed, int initPointNum, Vector2 direction,int colorColumn,bool isRandomColor)
+        public void ShotGimmick(ObjType type, float speed, int initPointNum, Vector2 direction, int colorColumn, bool isRandomColor)
         {
             switch (type)
             {
@@ -88,30 +84,34 @@ namespace TechC
                     CircleMove(speed, initPointNum);
                     break;
             }
-            SetColor setColor = lastObj.gameObject.GetComponent<SetColor>();
 
-            if (!isRandomColor && colorPalette != null && colorPalette.colors.Count > 0)
+            SetColor setColor = lastObj?.GetComponent<SetColor>();
+            if (setColor == null || colorPalette == null || colorPalette.colors.Count == 0) return;
+
+            if (!isRandomColor)
             {
-                setColor.SetColorPalette(GameManager.I.colorRow,colorColumn);
+                setColor.SetColorPalette(GameManager.I.colorRow, colorColumn);
             }
-            if (isRandomColor && colorPalette != null && colorPalette.colors.Count > 0)
+            else
             {
-                // 最後の Colors オブジェクトを取得
-                Colors lastColors = colorPalette.colors[colorPalette.colors.Count - 1];
-                
-                int rand = Random.Range(0, colorPalette.colors.Count);
-                setColor.SetColorPalette(GameManager.I.colorRow, rand);
+                int randomIndex = Random.Range(0, levelCollection.levels[GameManager.I.GetCurrentLevel()-1].activeColor);
+                Debug.Log(randomIndex);
+                setColor.SetColorPalette(GameManager.I.colorRow, randomIndex);
+
+               
             }
         }
 
+
         public void InitGimmick()
         {
-            lineIndex = 0;
-            circleIndex = 0;    
+            //lineIndex = 0;
+            //circleIndex = 0;    
             foreach (var obj in activeObj)
             {
                 if (obj != null)
                 {
+                    //objectPool.ReturnObject(obj);
                     obj.SetActive(false);
                 }
             }
@@ -126,23 +126,35 @@ namespace TechC
         /// <param name="direction"></param>
         private void LineMove(float speed, int initPointNum, Vector2 direction)
         {
-            if (initPointNum < 0 || initPointNum >= points.Length || initPointNum >= linesObj.Length) return;
+            if (points == null || initPointNum < 0 || initPointNum >= points.Length)
+            {
+                Debug.LogWarning($"Invalid initPointNum ({initPointNum}). points is null or out of range.");
+                return;
+            }
 
-            GameObject line = linesObj[lineIndex];
-            if (line == null) return;
+            GameObject line = objectPool.GetObject(lineObj);
+            if (line == null)
+            {
+                Debug.LogError("Failed to get line object from pool.");
+                return;
+            }
 
-            // オブジェクトを再利用
-            line.SetActive(true);
+            if (points[initPointNum] == null)
+            {
+                Debug.LogError($"points[{initPointNum}] is null.");
+                return;
+            }
+
             line.transform.position = points[initPointNum].position;
-            line.transform.rotation = Quaternion.identity;
+            SetRotation(line, direction);
 
             activeObj.Add(line);
             lastObj = line;
 
-            StartCoroutine(MoveRectTransform(linesRect[lineIndex], direction, speed));
-            lineIndex++;
-
+            RectTransform rectTransform = line.GetComponent<RectTransform>();
+            StartCoroutine(MoveRectTransform(rectTransform, direction, speed));
         }
+
 
         private IEnumerator MoveRectTransform(RectTransform rectTransform, Vector2 direction, float speed)
         {
@@ -161,14 +173,14 @@ namespace TechC
         /// <param name="initPointNum"></param>
         private void CircleMove(float speed, int initPointNum)
         {
-            if (initPointNum < 0 || initPointNum >= points.Length || initPointNum >= circlesObj.Length) return;
+            //if (initPointNum < 0 || initPointNum >= points.Length || initPointNum >= circlesObj.Length) return;
 
-            GameObject circle = circlesObj[circleIndex];
-            circleIndex++;  
+            GameObject circle = objectPool.GetObject(circleObj);
+            //circleIndex++;  
             if (circle == null) return;
 
             // オブジェクトを再利用
-            circle.SetActive(true);
+            //circle.SetActive(true);
             circle.transform.position = points[initPointNum].position;
 
             activeObj.Add(circle);
@@ -193,6 +205,49 @@ namespace TechC
                 rect.sizeDelta = currentSize;
                 yield return null;
             }
+        }
+
+        private void SetRotation(GameObject obj,Vector2 direction)
+        {
+            switch (direction)
+            {
+                case Vector2 up when direction == Vector2.up:
+                    // 上方向の場合
+                    obj.transform.rotation = Quaternion.identity;
+                    break;
+                case Vector2 down when direction == Vector2.down:
+                    // 下方向の場合
+                    obj.transform.rotation = Quaternion.identity;
+                    break;
+                case Vector2 right when direction == Vector2.right:
+                    // 右方向の場合
+                    obj.transform.rotation = Quaternion.Euler(0, 0, -90);
+                    break;
+                case Vector2 left when direction == Vector2.left:
+                    // 左方向の場合
+                    obj.transform.rotation = Quaternion.Euler(0, 0, 90);
+                    break;
+                case Vector2 rightDown when direction == new Vector2(1, -1):
+                    // 右下方向の場合
+                    obj.transform.rotation = Quaternion.Euler(0, 0, 45);  // -45度回転
+                    break;
+                case Vector2 rightUp when direction == new Vector2(1, 1):
+                    // 右上方向の場合
+                    obj.transform.rotation = Quaternion.Euler(0, 0, -45);  // 45度回転
+                    break;
+                case Vector2 leftDown when direction == new Vector2(-1, -1):
+                    // 左下方向の場合
+                    obj.transform.rotation = Quaternion.Euler(0, 0, 135);  // 135度回転
+                    break;
+                case Vector2 leftUp when direction == new Vector2(-1, 1):
+                    // 左上方向の場合
+                    obj.transform.rotation = Quaternion.Euler(0, 0, -135);  // -135度回転
+                    break;
+                default:
+                    Debug.Log("Other direction.");
+                    break;
+            }
+
         }
     }
 }
