@@ -15,6 +15,8 @@ namespace TechC
         [SerializeField] private PlayerController playerController;
 
         public List<Vector2> activeColor = new List<Vector2>();
+        private Coroutine currentGimmickCoroutine;
+        private int gimmickCounter = 0;
 
         private int paletteRow = 0;
 
@@ -116,25 +118,18 @@ namespace TechC
                     break;
             }
         }
-        public void StartLevel(int levelIndex)
-        {
-            if (levelIndex < 0 || levelIndex >= levelCollection.levels.Length) return;
 
-            LevelData levelData = levelCollection.levels[GameManager.I.GetCurrentLevel() - 1];
-            playerController.ReseyHitObj();
-            Debug.Log(levelData);
-            // ギミックの処理を開始
-            StartCoroutine(TriggerGimmicksWithDelay(levelData.gimmicks));
-        }
 
         private IEnumerator TriggerGimmicksWithDelay(GimmickData[] gimmicks)
         {
+            yield return new WaitForSeconds(changeLevelAnimation.GetAnimationDuration(GameManager.I.GetCurrentLevel() - 1));
+
+            gimmickCounter = 0;
+
+            lineGimmick.InitGimmick();
             foreach (var gimmick in gimmicks)
             {
-                // ギミックの遅延を処理
                 yield return new WaitForSeconds(gimmick.delay);
-
-                // ギミックを発火
                 lineGimmick.ShotGimmick(
                     gimmick.type,
                     gimmick.speed,
@@ -143,12 +138,41 @@ namespace TechC
                     gimmick.colorColumn,
                     gimmick.isRandomColor
                 );
-            }
-            yield return new WaitForSeconds(5f);
 
+                gimmickCounter++;
+                Debug.Log($"Gimmick triggered. Count: {gimmickCounter}");
+            }
+
+            yield return new WaitForSeconds(5f);
+            Debug.Log($"Total gimmicks triggered: {gimmickCounter}");
             lineGimmick.InitGimmick();
             MoveToNextState();
         }
+
+
+        public void StartLevel(int levelIndex)
+        {
+            if (levelIndex < 0 || levelIndex >= levelCollection.levels.Length) return;
+
+            // 既存のコルーチンを停止
+            if (currentGimmickCoroutine != null)
+            {
+                StopCoroutine(currentGimmickCoroutine);
+                currentGimmickCoroutine = null;
+            }
+
+            // ギミックリセット処理
+            lineGimmick.InitGimmick();
+
+            LevelData levelData = levelCollection.levels[GameManager.I.GetCurrentLevel() - 1];
+            playerController.ReseyHitObj();
+
+            Debug.Log(levelData);
+
+            // ギミックの処理を開始
+            currentGimmickCoroutine = StartCoroutine(TriggerGimmicksWithDelay(levelData.gimmicks));
+        }
+
 
 
         private void Level_1Init()
@@ -160,7 +184,6 @@ namespace TechC
         private void Level_2Init()
         {
             SetActiveColors();
-
             StartLevel(GameManager.I.GetCurrentLevel());
 
         }
@@ -259,7 +282,7 @@ namespace TechC
         private void SetActiveColors()
         {
             activeColor.Clear();
-            for (int i = 0; i < levelCollection.levels[GameManager.I.GetCurrentLevel()].activeColor-1; i++)
+            for (int i = 0; i < levelCollection.levels[GameManager.I.GetCurrentLevel()-1].activeColor+1; i++)
             {
                 activeColor.Add(new Vector2(paletteRow, i));
             }

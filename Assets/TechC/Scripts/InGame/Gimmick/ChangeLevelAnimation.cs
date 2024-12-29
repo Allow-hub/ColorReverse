@@ -17,6 +17,11 @@ namespace TechC
         [SerializeField] private RectTransform maxWidth, maxHeight;
         [Header("AnimationObj")]
         [SerializeField] private RectTransform stage_1Rect;
+        [SerializeField] private RectTransform stage_2Rect;
+        [SerializeField] private RectTransform stage_3Rect;
+        [SerializeField] private RectTransform stage_4Rect;
+        [SerializeField] private RectTransform stage_5Rect;
+        [SerializeField] private GameObject levelText;
 
         public void StartChangeLevelAnim(Level level) => StartCoroutine(ChangeLevelAnim(level));
 
@@ -30,20 +35,21 @@ namespace TechC
                     break;
 
                 case Level.Level_2:
-                    Debug.Log("Playing Level 2 animation.");
-                    // 他のアニメーション処理を追加可能
+                    yield return Animate(stage_1Rect, Vector2.zero, minWidth.anchoredPosition, animDuration[0], animCurves[0]);
+
                     break;
 
                 case Level.Level_3:
-                    Debug.Log("Playing Level 3 animation.");
+                    yield return Animate(stage_1Rect, Vector2.zero, minWidth.anchoredPosition, animDuration[0], animCurves[0]);
+
                     break;
 
                 case Level.Level_4:
-                    Debug.Log("Playing Level 4 animation.");
+                    yield return Animate(stage_1Rect, Vector2.zero, minWidth.anchoredPosition, animDuration[0], animCurves[0]);
                     break;
 
                 case Level.Level_5:
-                    Debug.Log("Playing Level 5 animation.");
+                    yield return Animate(stage_1Rect, Vector2.zero, minWidth.anchoredPosition, animDuration[0], animCurves[0]);
                     break;
             }
 
@@ -55,6 +61,7 @@ namespace TechC
         /// </summary>
         private IEnumerator Animate(RectTransform target, Vector2 startPosition, Vector2 endPosition, float duration, AnimationCurve curve)
         {
+            levelText.SetActive(true);
             float elapsedTime = 0f;
 
             while (elapsedTime < duration)
@@ -71,6 +78,20 @@ namespace TechC
 
             // 最終位置を明示的に設定
             target.anchoredPosition = endPosition;
+            levelText.SetActive(false);
+
+        }
+
+        public float GetAnimationDuration(int level)
+        {
+            if (level >= 0 && level < animDuration.Length)
+            {
+                return animDuration[level];
+            }
+            else
+            {
+                return 4f;  // デフォルトのアニメーション時間
+            }
         }
     }
 }

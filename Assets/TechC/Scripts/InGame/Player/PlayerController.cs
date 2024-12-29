@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
 
 namespace TechC
 {
@@ -27,7 +25,8 @@ namespace TechC
         [SerializeField] private Vector2 yRange;
         //private List<GameObject> scoreText=new List<GameObject>();
         //private const int scoreTextIndex = 0;
-        private GameObject lastHitObject = null; 
+        private GameObject lastHitObject = null;
+        private bool isScaling = false; // アニメーション中かどうかを判定するフラグ
 
 
         [Header("ColorChange")]
@@ -237,6 +236,8 @@ namespace TechC
 
                 if(colorColumn !=currentColorColumn)return;
                 hitObjects.Add(other.gameObject);
+                StartCoroutine(ScaleMouseObj());
+
                 GameManager.I.AddScore(addGimmickScore);
                 AppearScoreText(mouseObj.transform,addGimmickScore);
             }
@@ -263,7 +264,38 @@ namespace TechC
             scoreText.SetText(score.ToString());
         }
 
+        private IEnumerator ScaleMouseObj()
+        {
+            isScaling = true; // アニメーションが進行中の間は新たに始めないようにする
 
+            Vector3 originalScale = mouseObj.transform.localScale;  // 元のスケール
+            Vector3 targetScale = originalScale * 1.2f;  // 目標のスケール（20%拡大）
+
+            float elapsedTime = 0f;
+            float scaleDuration = 0.5f;  // 変化時間（0.5秒）
+
+            // スケールアップ処理
+            while (elapsedTime < scaleDuration)
+            {
+                mouseObj.transform.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / scaleDuration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            mouseObj.transform.localScale = targetScale; // 正確に目標スケールに到達させる
+
+            elapsedTime = 0f;  // 再度計測をリセット
+
+            // スケールダウン処理
+            while (elapsedTime < scaleDuration)
+            {
+                mouseObj.transform.localScale = Vector3.Lerp(targetScale, originalScale, elapsedTime / scaleDuration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            mouseObj.transform.localScale = originalScale; // 元のスケールに戻す
+
+            isScaling = false; // アニメーション終了後、新たなアクションを可能にする
+        }
 
     }
 }

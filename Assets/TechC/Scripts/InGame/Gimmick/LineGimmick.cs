@@ -90,18 +90,40 @@ namespace TechC
 
             if (!isRandomColor)
             {
-                setColor.SetColorPalette(GameManager.I.colorRow, colorColumn);
+                if (IsValidColorIndex(GameManager.I.colorRow, colorColumn))
+                {
+                    setColor.SetColorPalette(GameManager.I.colorRow, colorColumn);
+                }
+                else
+                {
+                    Debug.LogError("Invalid color index specified.");
+                }
             }
             else
             {
-                int randomIndex = Random.Range(0, levelCollection.levels[GameManager.I.GetCurrentLevel()-1].activeColor);
-                Debug.Log(randomIndex);
-                setColor.SetColorPalette(GameManager.I.colorRow, randomIndex);
+                // 有効なインデックス範囲を取得
+                int maxColorIndex = Mathf.Min(
+                    levelCollection.levels[GameManager.I.GetCurrentLevel() - 1].activeColor,
+                    colorPalette.colors[GameManager.I.colorRow].colors.Count - 1
+                );
 
-               
+                if (maxColorIndex < 0)
+                {
+                    Debug.LogError("Invalid maximum color index. Ensure activeColor and palette row are correctly configured.");
+                    return;
+                }
+
+                // ランダムインデックスを生成
+                int randomIndex = Random.Range(0, maxColorIndex + 1);
+                setColor.SetColorPalette(GameManager.I.colorRow, randomIndex);
             }
         }
 
+        private bool IsValidColorIndex(int row, int column)
+        {
+            return row >= 0 && row < colorPalette.colors.Count &&
+                   column >= 0 && column < colorPalette.colors[row].colors.Count;
+        }
 
         public void InitGimmick()
         {

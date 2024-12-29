@@ -45,12 +45,25 @@ namespace TechC
                 boxCollider.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, colZSize);
         }
 
-        public void SetColorPalette(int row ,int column)
+        public void SetColorPalette(int row, int column)
         {
+            if (row < 0 || row >= palette.colors.Count)
+            {
+                Debug.LogError($"Invalid row index: {row}. Available rows: 0 to {palette.colors.Count - 1}");
+                return;
+            }
+
+            if (column < 0 || column >= palette.colors[row].colors.Count)
+            {
+                Debug.LogError($"Invalid column index: {column}. Available columns in row {row}: 0 to {palette.colors[row].colors.Count - 1}");
+                return;
+            }
+
             paletteRow = row;
             paletteColumn = column;
             image.color = palette.colors[paletteRow].colors[paletteColumn];
         }
+
 
         //public void SetColors(Color col)
         //{
