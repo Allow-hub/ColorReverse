@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static TechC.LevelManager;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace TechC
 {
@@ -15,9 +16,11 @@ namespace TechC
 
         [SerializeField] private RectTransform minWidth, minHeight;
         [SerializeField] private RectTransform maxWidth, maxHeight;
+
+        [SerializeField] private GameObject[] stage;
         [Header("AnimationObj")]
         [SerializeField] private RectTransform stage_1Rect;
-        [SerializeField] private RectTransform stage_2Rect;
+        [SerializeField] private RectTransform stage_2Rect, stage_2Rect_2;
         [SerializeField] private RectTransform stage_3Rect;
         [SerializeField] private RectTransform stage_4Rect;
         [SerializeField] private RectTransform stage_5Rect;
@@ -28,6 +31,7 @@ namespace TechC
         private IEnumerator ChangeLevelAnim(Level level)
         {
 
+            ActiveStage(GameManager.I.GetCurrentLevel() - 1);
             switch (level)
             {
                 case Level.Level_1:
@@ -35,8 +39,8 @@ namespace TechC
                     break;
 
                 case Level.Level_2:
-                    yield return Animate(stage_1Rect, Vector2.zero, minWidth.anchoredPosition, animDuration[0], animCurves[0]);
-
+                    StartCoroutine(Animate(stage_2Rect, stage_2Rect.anchoredPosition, new Vector2(stage_2Rect.anchoredPosition.x, minHeight.anchoredPosition.y), animDuration[0], animCurves[0]));
+                    StartCoroutine(Animate(stage_2Rect_2, stage_2Rect_2.anchoredPosition, new Vector2(stage_2Rect_2.anchoredPosition.x, minHeight.anchoredPosition.y), animDuration[0], animCurves[0]));
                     break;
 
                 case Level.Level_3:
@@ -55,6 +59,26 @@ namespace TechC
 
             GameManager.I.ChangePlayModeState();
         }
+
+        private void ActiveStage(int value)
+        {
+            // 全てのステージをループで処理
+            for (int i = 0; i < stage.Length; i++)
+            {
+                if (i == value)
+                {
+                    // 指定されたステージをアクティブ化
+                    stage[i].SetActive(true);
+                }
+                else
+                {
+                    // それ以外のステージを非アクティブ化
+                    stage[i].SetActive(false);
+                }
+            }
+        }
+
+
 
         /// <summary>
         /// アニメーションを行う汎用メソッド

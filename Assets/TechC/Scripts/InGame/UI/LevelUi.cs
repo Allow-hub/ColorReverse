@@ -15,6 +15,7 @@ namespace TechC
 
         private void OnEnable()
         {
+            if (GameManager.I == null) return;
             tex.text ="Level " + GameManager.I.GetCurrentLevel().ToString();
         }
     }
