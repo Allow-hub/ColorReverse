@@ -29,7 +29,8 @@ namespace TechC
             Level_2,
             Level_3,
             Level_4,
-            Level_5
+            Level_5,
+            AfterLevel_5
         }
 
         public Level currentLevel = Level.Level_1;
@@ -46,6 +47,12 @@ namespace TechC
         }
         private void Update()
         {
+            if (GameManager.I.currentState == GameManager.GameState.GameOver)
+            {
+                StopAllCoroutines();
+                return;
+            }
+
             StateHandler();
 
             if (lastLevel == GameManager.I.GetCurrentLevel()) return;
@@ -94,6 +101,9 @@ namespace TechC
                 case Level.Level_5:
                     Level_5Init();
                     break;
+                case Level.AfterLevel_5:
+                    AfterLevel_5Init();
+                    break;
             }
         }
 
@@ -116,6 +126,9 @@ namespace TechC
                 case Level.Level_5:
                     Level_5();
                     break;
+                case Level.AfterLevel_5:
+                    AfterLevel_5();
+                    break;
             }
         }
 
@@ -123,6 +136,7 @@ namespace TechC
         private IEnumerator TriggerGimmicksWithDelay(GimmickData[] gimmicks)
         {
             yield return new WaitForSeconds(changeLevelAnimation.GetAnimationDuration(GameManager.I.GetCurrentLevel() - 1));
+            yield return new WaitForSeconds(1f);
 
             gimmickCounter = 0;
 
@@ -152,8 +166,8 @@ namespace TechC
 
         public void StartLevel(int levelIndex)
         {
-            if (levelIndex < 0 || levelIndex >= levelCollection.levels.Length) return;
 
+            if (levelIndex < 0 || levelIndex >= levelCollection.levels.Length) return;
             // 既存のコルーチンを停止
             if (currentGimmickCoroutine != null)
             {
@@ -167,7 +181,6 @@ namespace TechC
             LevelData levelData = levelCollection.levels[GameManager.I.GetCurrentLevel() - 1];
             playerController.ReseyHitObj();
 
-            Debug.Log(levelData);
 
             // ギミックの処理を開始
             currentGimmickCoroutine = StartCoroutine(TriggerGimmicksWithDelay(levelData.gimmicks));
@@ -206,10 +219,32 @@ namespace TechC
         private void Level_5Init()
         {
             SetActiveColors();
-
-            Debug.Log("Initializing Level 5...");
-            // レベル5の初期化処理
+            StartLevel(GameManager.I.GetCurrentLevel());
         }
+        private void AfterLevel_5Init()
+        {
+            // 最後のレベルデータを使用
+            LevelData finalLevelData = levelCollection.levels[levelCollection.levels.Length - 1];
+            StartLevelWithCustomData(finalLevelData);
+        }
+
+        private void StartLevelWithCustomData(LevelData levelData)
+        {
+            // 既存のコルーチンを停止
+            if (currentGimmickCoroutine != null)
+            {
+                StopCoroutine(currentGimmickCoroutine);
+                currentGimmickCoroutine = null;
+            }
+
+            // ギミックリセット処理
+            lineGimmick.InitGimmick();
+            playerController.ReseyHitObj();
+
+            // ギミックの処理を開始
+            currentGimmickCoroutine = StartCoroutine(TriggerGimmicksWithDelay(levelData.gimmicks));
+        }
+
         private void SetActiveColors(int startColumn, int count)
         {
             activeColor.Clear();
@@ -247,6 +282,11 @@ namespace TechC
             Debug.Log("Executing Level 5 logic...");
             // レベル5のステート処理
         }
+        private void AfterLevel_5()
+        {
+            Debug.Log("Executing AfLevel 5 logic...");
+            // レベル5のステート処理
+        }
         private void MoveToNextState()
         {
             // 現在のレベルを次のレベルに移行
@@ -258,26 +298,30 @@ namespace TechC
                     break;
                 case Level.Level_2:
                     GameManager.I.ChangeNextLevelState();
-
                     ChangeLevel_3State();
                     break;
                 case Level.Level_3:
                     GameManager.I.ChangeNextLevelState();
-
                     ChangeLevel_4State();
                     break;
                 case Level.Level_4:
                     GameManager.I.ChangeNextLevelState();
-
                     ChangeLevel_5State();
                     break;
                 case Level.Level_5:
                     GameManager.I.ChangeNextLevelState();
+                    ChangeAfterLevel_5State();
+                    break;
+                case Level.AfterLevel_5:
+                    GameManager.I.ChangeNextLevelState();
 
-                    Debug.Log("All levels completed!");
+                    ChangeAfterLevel_5State();
                     break;
             }
         }
+
+       
+
 
         private void SetActiveColors()
         {
@@ -301,6 +345,8 @@ namespace TechC
         private void ChangeLevel_3State() => SetState(Level.Level_3);
         private void ChangeLevel_4State() => SetState(Level.Level_4);
         private void ChangeLevel_5State() => SetState(Level.Level_5);
+        private void ChangeAfterLevel_5State() => SetState(Level.AfterLevel_5);
+
 
     }
 }

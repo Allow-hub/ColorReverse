@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace TechC
 {
     /// <summary>
-    /// ƒvƒŒƒCƒ„[‚Ì‘€ì‚·‚éƒIƒuƒWƒFƒNƒg‚Ì‹““®
+    /// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ“ä½œã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æŒ™å‹•
     /// </summary>
     public class PlayerController : MonoBehaviour
     {
@@ -17,16 +17,20 @@ namespace TechC
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private ObjectPool objectPool;
 
-        [SerializeField] private Texture2D customCursor;  // ƒJƒXƒ^ƒ€ƒJ[ƒ\ƒ‹
-        [SerializeField] private GameObject mouseObj;     // ƒ}ƒEƒXƒIƒuƒWƒFƒNƒg
-        [SerializeField] private LayerMask raycastLayer;  // ƒŒƒCƒLƒƒƒXƒg‘ÎÛ‚ÌƒŒƒCƒ„[
-        [SerializeField] private GameObject scoreTextPrefab;
+        [SerializeField] private Texture2D customCursor;  // ã‚«ã‚¹ã‚¿ãƒ ã‚«ãƒ¼ã‚½ãƒ«
+        [SerializeField] private GameObject mouseObj;     // ãƒã‚¦ã‚¹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+        [SerializeField] private Vector3 initMouseObj;
+        [SerializeField] private LayerMask raycastLayer;  // ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆå¯¾è±¡ã®ãƒ¬ã‚¤ãƒ¤ãƒ¼
+        [SerializeField] private GameObject scoreTextPrefab, scoreTextGimmickPrefab;
         [SerializeField] private Vector2 xRange;
         [SerializeField] private Vector2 yRange;
+
+        [SerializeField] private float expandSize =1.5f;    
+        [SerializeField] private Vector2 radiusRange = new Vector2(10, 100);
         //private List<GameObject> scoreText=new List<GameObject>();
         //private const int scoreTextIndex = 0;
         private GameObject lastHitObject = null;
-        private bool isScaling = false; // ƒAƒjƒ[ƒVƒ‡ƒ“’†‚©‚Ç‚¤‚©‚ğ”»’è‚·‚éƒtƒ‰ƒO
+        private bool isScaling = false; // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ä¸­ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹ãƒ•ãƒ©ã‚°
 
 
         [Header("ColorChange")]
@@ -37,16 +41,17 @@ namespace TechC
         [SerializeField] private string colorImageTag;
         [SerializeField] private LayerMask colorChangeLayer;
         [SerializeField] private int addColorChangeScore;
-        private int currentColorColumn; //Œ»İæ‚Á‚Ä‚¢‚éF
+        private int currentColorColumn; //ç¾åœ¨ä¹—ã£ã¦ã„ã‚‹è‰²
 
         [Header("Gimmick")]
         private List<GameObject> hitObjects = new List<GameObject>();
         [SerializeField] private int addGimmickScore;
+        [SerializeField] private GameObject gameOverCanvas;
 
         public enum AnimationType
         {
-            Normal,//y²‚Ì‚İ‚Ì‰ñ“]
-            Round//‰ñ‚é
+            Normal,//yè»¸ã®ã¿ã®å›è»¢
+            Round//å›ã‚‹
         }
 
         [SerializeField] private float distance = 1000;
@@ -54,65 +59,75 @@ namespace TechC
 
         private void Awake()
         {
-            // ƒJƒXƒ^ƒ€ƒJ[ƒ\ƒ‹‚ğİ’è
+            gameOverCanvas.SetActive(false);
+
+            // ã‚«ã‚¹ã‚¿ãƒ ã‚«ãƒ¼ã‚½ãƒ«ã‚’è¨­å®š
             if (customCursor != null)
             {
                 Cursor.SetCursor(customCursor, new Vector2(customCursor.width / 2, customCursor.height / 2), CursorMode.ForceSoftware);
             }
             else
             {
-                Debug.LogWarning("ƒJƒXƒ^ƒ€ƒJ[ƒ\ƒ‹‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                Debug.LogWarning("ã‚«ã‚¹ã‚¿ãƒ ã‚«ãƒ¼ã‚½ãƒ«ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             }
 
-            // ƒJ[ƒ\ƒ‹‚ğ‰æ–Ê“à‚É§ŒÀ
+            // ã‚«ãƒ¼ã‚½ãƒ«ã‚’ç”»é¢å†…ã«åˆ¶é™
             Cursor.lockState = CursorLockMode.Confined;
+            initMouseObj=mouseObj.transform.localScale;
 
         }
     
 
         private void Update()
         {
+            if(GameManager.I.currentState == GameManager.GameState.GameOver)
+            {
+                ResetCursor();
+                return;
+            }
+
             if (mouseObj != null)
             {
-                // ƒ}ƒEƒXˆÊ’u‚©‚çƒŒƒC‚ğ”ò‚Î‚·
+                // ãƒã‚¦ã‚¹ä½ç½®ã‹ã‚‰ãƒ¬ã‚¤ã‚’é£›ã°ã™
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
 
-                // ƒfƒoƒbƒO—p‚ÉƒŒƒC‚ğ•`‰æ
+                // ãƒ‡ãƒãƒƒã‚°ç”¨ã«ãƒ¬ã‚¤ã‚’æç”»
                 Debug.DrawRay(ray.origin, ray.direction * distance, Color.green);
 
-                // ƒŒƒCƒLƒƒƒXƒg‚ªƒqƒbƒg‚µ‚½ê‡
+                // ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆãŒãƒ’ãƒƒãƒˆã—ãŸå ´åˆ
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity, raycastLayer))
                 {
-                    // ƒqƒbƒgˆÊ’u‚ÉmouseObj‚ğˆÚ“®
+                    // ãƒ’ãƒƒãƒˆä½ç½®ã«mouseObjã‚’ç§»å‹•
                     mouseObj.transform.position = hit.point;
 
 
                 }
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity, colorChangeLayer))
                 {
-                    // ‚à‚µAŒ»İ“–‚½‚Á‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg‚ª‘O‰ñ‚Æˆá‚¤ê‡
+                    // ã‚‚ã—ã€ç¾åœ¨å½“ãŸã£ã¦ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒå‰å›ã¨é•ã†å ´åˆ
                     if (hit.transform.gameObject != lastHitObject)
                     {
                         if (hit.collider.CompareTag(colorImageTag))
                         {
-                            HitEvent(hit.transform.tag, hit.transform.gameObject);  // V‚µ‚¢ƒIƒuƒWƒFƒNƒg‚É‘Î‚µ‚Äˆ—‚ğÀs
+                            HitEvent(hit.transform.tag, hit.transform.gameObject);  // æ–°ã—ã„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«å¯¾ã—ã¦å‡¦ç†ã‚’å®Ÿè¡Œ
                         }
 
-                        lastHitObject = hit.transform.gameObject;  // Œ»İ‚ÌƒIƒuƒWƒFƒNƒg‚ğ‹L˜^
+                        lastHitObject = hit.transform.gameObject;  // ç¾åœ¨ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¨˜éŒ²
                     }
 
                 }
             }
             else
             {
-                Debug.LogWarning("mouseObj‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                Debug.LogWarning("mouseObjãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             }
         }
+        public void ResetCursor() => Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
         private IEnumerator StartChange(int paletteIndex, int colorIndex, AnimationType animationType)
         {
-            // ƒAƒjƒ[ƒVƒ‡ƒ“ƒ^ƒCƒv‚É‰‚¶‚½ƒgƒŠƒK[‚ğİ’è
+            // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¿ã‚¤ãƒ—ã«å¿œã˜ãŸãƒˆãƒªã‚¬ãƒ¼ã‚’è¨­å®š
             switch (animationType)
             {
                 case AnimationType.Normal:
@@ -127,51 +142,51 @@ namespace TechC
                     break;
             }
 
-            // ƒtƒBƒ‹ƒAƒjƒ[ƒVƒ‡ƒ“ŠJn
+            // ãƒ•ã‚£ãƒ«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é–‹å§‹
             if (frontImage != null)
             {
                 float elapsedTime = 0f;
                 frontImageObj.SetActive(true);
                 frontImage.fillAmount = 0;
                 ColorChange(frontImage, paletteIndex, colorIndex);
-                // frontImage‚ÌfillAmount‚ğ0‚©‚ç1‚ÉƒAƒjƒ[ƒVƒ‡ƒ“
+                // frontImageã®fillAmountã‚’0ã‹ã‚‰1ã«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
                 while (elapsedTime < fillDuration)
                 {
                     elapsedTime += Time.deltaTime;
                     frontImage.fillAmount = Mathf.Clamp01(elapsedTime / fillDuration);
-                    yield return null; // ŸƒtƒŒ[ƒ€‚Ü‚Å‘Ò‹@
+                    yield return null; // æ¬¡ãƒ•ãƒ¬ãƒ¼ãƒ ã¾ã§å¾…æ©Ÿ
                 }
 
-                // ƒtƒBƒ‹ƒAƒjƒ[ƒVƒ‡ƒ“Š®—¹Œã‚ÉbackImage‚ÌF‚ğ•ÏX
+                // ãƒ•ã‚£ãƒ«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å®Œäº†å¾Œã«backImageã®è‰²ã‚’å¤‰æ›´
                 ColorChange(backImage,paletteIndex, colorIndex);
                 frontImageObj.SetActive(false);
 
             }
             else
             {
-                Debug.LogWarning("frontImage‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                Debug.LogWarning("frontImageãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             }
         }
 
 
         private void ColorChange(Image image,int paletteIndex, int colorIndex)
         {
-            // ƒpƒŒƒbƒg‚ÆF‚Ì”ÍˆÍ‚ğŠm”F
+            // ãƒ‘ãƒ¬ãƒƒãƒˆã¨è‰²ã®ç¯„å›²ã‚’ç¢ºèª
             if (palette == null)
             {
-                Debug.LogWarning("ƒJƒ‰[ƒpƒŒƒbƒg‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+                Debug.LogWarning("ã‚«ãƒ©ãƒ¼ãƒ‘ãƒ¬ãƒƒãƒˆãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
                 return;
             }
 
             if (paletteIndex < 0 || paletteIndex >= palette.colors.Count)
             {
-                Debug.LogWarning($"–³Œø‚ÈƒpƒŒƒbƒgƒCƒ“ƒfƒbƒNƒX: {paletteIndex}");
+                Debug.LogWarning($"ç„¡åŠ¹ãªãƒ‘ãƒ¬ãƒƒãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹: {paletteIndex}");
                 return;
             }
 
             if (colorIndex < 0 || colorIndex >= palette.colors[paletteIndex].colors.Count)
             {
-                Debug.LogWarning($"–³Œø‚ÈƒJƒ‰[ƒpƒŒƒbƒgƒCƒ“ƒfƒbƒNƒX: {colorIndex}");
+                Debug.LogWarning($"ç„¡åŠ¹ãªã‚«ãƒ©ãƒ¼ãƒ‘ãƒ¬ãƒƒãƒˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹: {colorIndex}");
                 return;
             }
             if (image != null)
@@ -180,44 +195,44 @@ namespace TechC
             }
             else
             {
-                Debug.LogWarning("mouseObj‚ÉImageƒRƒ“ƒ|[ƒlƒ“ƒg‚ª‚ ‚è‚Ü‚¹‚ñB");
+                Debug.LogWarning("mouseObjã«Imageã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
             }
         }
 
         private void HitEvent(string tag, GameObject hitObj)
         {
             GameManager.I.AddScore(addColorChangeScore);
-            AppearScoreText(mouseObj.transform, addColorChangeScore);
+            AppearScoreText(mouseObj.transform, addColorChangeScore,scoreTextPrefab);
             System.Random random = new System.Random();
             Array enumValues = Enum.GetValues(typeof(AnimationType));
 
             AnimationType type = (AnimationType)enumValues.GetValue(random.Next(enumValues.Length));
-            // SetColorƒRƒ“ƒ|[ƒlƒ“ƒg‚ğæ“¾
+            // SetColorã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å–å¾—
             SetColor setColor = hitObj.GetComponent<SetColor>();
             int currentColumn = setColor.GetPaletteColumn();
             currentColorColumn = currentColumn;
-            // activeColor‚ÌƒŠƒXƒg“à‚Ì‚·‚×‚Ä‚Ìy’l‚ğæ“¾
+            // activeColorã®ãƒªã‚¹ãƒˆå†…ã®ã™ã¹ã¦ã®yå€¤ã‚’å–å¾—
             List<float> yValues = new List<float>();
             foreach (var colorData in levelManager.activeColor)
             {
-                yValues.Add(colorData.y);  // y‚Ì’l‚ğƒŠƒXƒg‚É’Ç‰Á
+                yValues.Add(colorData.y);  // yã®å€¤ã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ 
             }
 
-            // ˆê’v‚µ‚È‚¢y’l‚Ì‚İ‚ğƒtƒBƒ‹ƒ^ƒŠƒ“ƒO
+            // ä¸€è‡´ã—ãªã„yå€¤ã®ã¿ã‚’ãƒ•ã‚£ãƒ«ã‚¿ãƒªãƒ³ã‚°
             List<float> nonMatchingYValues = yValues.FindAll(y => y != currentColumn);
 
             if (nonMatchingYValues.Count > 0)
             {
-                // ˆê’v‚µ‚È‚¢y’l‚Ì’†‚©‚çƒ‰ƒ“ƒ_ƒ€‚É‘I‘ğ
+                // ä¸€è‡´ã—ãªã„yå€¤ã®ä¸­ã‹ã‚‰ãƒ©ãƒ³ãƒ€ãƒ ã«é¸æŠ
                 float randomY = nonMatchingYValues[random.Next(nonMatchingYValues.Count)];
 
-                // ‘I‘ğ‚µ‚½y’l‚É‘Î‰‚·‚éˆ—‚ğ’Ç‰Á
+                // é¸æŠã—ãŸyå€¤ã«å¯¾å¿œã™ã‚‹å‡¦ç†ã‚’è¿½åŠ 
                 int paletteIndex = (int)levelManager.activeColor[0].x;
                 StartCoroutine(StartChange(paletteIndex, (int)randomY, type));
             }
             else
             {
-                Debug.LogWarning("ˆê’v‚µ‚È‚¢y’l‚ª‚ ‚è‚Ü‚¹‚ñB");
+                Debug.LogWarning("ä¸€è‡´ã—ãªã„yå€¤ãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
             }
         }
 
@@ -226,75 +241,88 @@ namespace TechC
 
         private void OnTriggerEnter(Collider other)
         {
-            // Õ“Ë‚µ‚½ƒIƒuƒWƒFƒNƒg‚ªuGimmickvƒ^ƒO‚ğ‚Âê‡
+            // è¡çªã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒã€ŒGimmickã€ã‚¿ã‚°ã‚’æŒã¤å ´åˆ
             if (other.gameObject.CompareTag("Gimmick"))
             {
-                // d•¡’Ç‰Á‚ğ–h‚®iŠù‚ÉƒŠƒXƒg‚É‘¶İ‚·‚éê‡‚Íˆ—‚µ‚È‚¢j
+                // é‡è¤‡è¿½åŠ ã‚’é˜²ãï¼ˆæ—¢ã«ãƒªã‚¹ãƒˆã«å­˜åœ¨ã™ã‚‹å ´åˆã¯å‡¦ç†ã—ãªã„ï¼‰
                 if (hitObjects.Contains(other.gameObject)) return;
                 SetColor setColor = other.GetComponent<SetColor>();
                 int colorColumn = setColor.GetPaletteColumn();
 
-                if(colorColumn !=currentColorColumn)return;
-                hitObjects.Add(other.gameObject);
-                StartCoroutine(ScaleMouseObj());
+                if(colorColumn == currentColorColumn)
+                {
 
-                GameManager.I.AddScore(addGimmickScore);
-                AppearScoreText(mouseObj.transform,addGimmickScore);
+                    hitObjects.Add(other.gameObject);
+                    StartCoroutine(ScaleMouseObj());
+
+                    GameManager.I.AddScore(addGimmickScore);
+                    AppearScoreText(mouseObj.transform, addGimmickScore, scoreTextGimmickPrefab);
+                }
+                else
+                {
+                    hitObjects.Add(other.gameObject);
+                    gameOverCanvas.SetActive(true);
+                    GameManager.I.ChangeGameOverState();
+                }
             }
         }
 
-        private void AppearScoreText(Transform pos, int score)
+        private void AppearScoreText(Transform pos, int score , GameObject obj)
         {
-            // ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚©‚ç”¼Œa3mˆÈ“à‚Ìƒ‰ƒ“ƒ_ƒ€‚ÈƒIƒtƒZƒbƒg‚ğ¶¬
-            //Vector3 randomOffset = new Vector3(
-            //    UnityEngine.Random.Range(xRange.x, xRange.y),
-                                  
-            //    UnityEngine.Random.Range(yRange.x, yRange.y) ,
-            //    pos.position.z
-            //);
+            // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¼ãƒ«ã‹ã‚‰ã‚¹ã‚³ã‚¢ãƒ†ã‚­ã‚¹ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—
+            GameObject scoreObj = objectPool.GetObject(obj);
+            RectTransform rectTransform = scoreObj.GetComponent<RectTransform>();
 
-            // ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚Éƒ‰ƒ“ƒ_ƒ€‚ÈƒIƒtƒZƒbƒg‚ğ‰Á‚¦‚é
-            //Vector3 randomPosition = pos.position + randomOffset;
+            // ãƒ©ãƒ³ãƒ€ãƒ ãªä½ç½®ã‚’è¨ˆç®— (pos ã‚’ä¸­å¿ƒã¨ã™ã‚‹åŠå¾„ 3m ã®å††ã®å†…å´)
+            float radius = UnityEngine.Random.Range(radiusRange.x, radiusRange.y); // åŠå¾„0ã€œ3mã®ãƒ©ãƒ³ãƒ€ãƒ ãªè·é›¢
+            float angle = UnityEngine.Random.Range(0, 2 * Mathf.PI); // 0ã€œ360åº¦ã®ãƒ©ãƒ³ãƒ€ãƒ ãªè§’åº¦
 
-            // ƒIƒuƒWƒFƒNƒgƒv[ƒ‹‚©‚çƒXƒRƒAƒeƒLƒXƒgƒIƒuƒWƒFƒNƒg‚ğæ“¾
-            GameObject scoreObj = objectPool.GetObject(scoreTextPrefab);
-            scoreObj.transform.position = pos.position ;  // ƒ‰ƒ“ƒ_ƒ€‚ÈˆÊ’u‚Éİ’è
-            // ƒXƒRƒAƒeƒLƒXƒg‚ğİ’è
+            Vector3 randomOffset = new Vector3(
+                radius * Mathf.Cos(angle), // xåº§æ¨™
+                radius * Mathf.Sin(angle), // yåº§æ¨™
+                0 // zåº§æ¨™ (å¹³é¢ã®å ´åˆ)
+            );
+
+            // ãƒ©ãƒ³ãƒ€ãƒ ãªä½ç½®ã‚’è¨­å®š
+            scoreObj.transform.position = pos.position + randomOffset;
+
+            // ã‚¹ã‚³ã‚¢ãƒ†ã‚­ã‚¹ãƒˆã‚’è¨­å®š
             ScoreText scoreText = scoreObj.GetComponent<ScoreText>();
             scoreText.SetText(score.ToString());
         }
 
+
         private IEnumerator ScaleMouseObj()
         {
-            isScaling = true; // ƒAƒjƒ[ƒVƒ‡ƒ“‚ªis’†‚ÌŠÔ‚ÍV‚½‚Én‚ß‚È‚¢‚æ‚¤‚É‚·‚é
+            isScaling = true; // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒé€²è¡Œä¸­ã®é–“ã¯æ–°ãŸã«å§‹ã‚ãªã„ã‚ˆã†ã«ã™ã‚‹
 
-            Vector3 originalScale = mouseObj.transform.localScale;  // Œ³‚ÌƒXƒP[ƒ‹
-            Vector3 targetScale = originalScale * 1.2f;  // –Ú•W‚ÌƒXƒP[ƒ‹i20%Šg‘åj
+            Vector3 originalScale = initMouseObj;  // å…ƒã®ã‚¹ã‚±ãƒ¼ãƒ«
+            Vector3 targetScale = originalScale * expandSize;  // ç›®æ¨™ã®ã‚¹ã‚±ãƒ¼ãƒ«
 
             float elapsedTime = 0f;
-            float scaleDuration = 0.5f;  // •Ï‰»ŠÔi0.5•bj
+            float scaleDuration = 0.3f;  // å¤‰åŒ–æ™‚é–“ï¼ˆ0.5ç§’ï¼‰
 
-            // ƒXƒP[ƒ‹ƒAƒbƒvˆ—
+            // ã‚¹ã‚±ãƒ¼ãƒ«ã‚¢ãƒƒãƒ—å‡¦ç†
             while (elapsedTime < scaleDuration)
             {
                 mouseObj.transform.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / scaleDuration);
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            mouseObj.transform.localScale = targetScale; // ³Šm‚É–Ú•WƒXƒP[ƒ‹‚É“’B‚³‚¹‚é
+            mouseObj.transform.localScale = targetScale; // æ­£ç¢ºã«ç›®æ¨™ã‚¹ã‚±ãƒ¼ãƒ«ã«åˆ°é”ã•ã›ã‚‹
 
-            elapsedTime = 0f;  // Ä“xŒv‘ª‚ğƒŠƒZƒbƒg
+            elapsedTime = 0f;  // å†åº¦è¨ˆæ¸¬ã‚’ãƒªã‚»ãƒƒãƒˆ
 
-            // ƒXƒP[ƒ‹ƒ_ƒEƒ“ˆ—
+            // ã‚¹ã‚±ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³å‡¦ç†
             while (elapsedTime < scaleDuration)
             {
                 mouseObj.transform.localScale = Vector3.Lerp(targetScale, originalScale, elapsedTime / scaleDuration);
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            mouseObj.transform.localScale = originalScale; // Œ³‚ÌƒXƒP[ƒ‹‚É–ß‚·
+            mouseObj.transform.localScale = originalScale; // å…ƒã®ã‚¹ã‚±ãƒ¼ãƒ«ã«æˆ»ã™
 
-            isScaling = false; // ƒAƒjƒ[ƒVƒ‡ƒ“I—¹ŒãAV‚½‚ÈƒAƒNƒVƒ‡ƒ“‚ğ‰Â”\‚É‚·‚é
+            isScaling = false; // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†å¾Œã€æ–°ãŸãªã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’å¯èƒ½ã«ã™ã‚‹
         }
 
     }

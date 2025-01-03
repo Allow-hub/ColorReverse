@@ -101,11 +101,17 @@ namespace TechC
             }
         }
 
-
+        private void ChangeCursorMode(bool visible, CursorLockMode cursorLockMode)
+        {
+            Cursor.visible = visible;
+            Cursor.lockState = cursorLockMode;
+        }
         public void AddScore(int value) => score += value;
         public int GetScore() => score;
         private void TitleInit()
         {
+            ChangeCursorMode(true, CursorLockMode.None);
+
             score = 0;  
         }
         private void NextLevelInit()
@@ -113,9 +119,16 @@ namespace TechC
             currentLevel++;
             ChangePlayModeState();
         }
-        private void PlayModeInit() { }
+        private void PlayModeInit()
+        {
+            ChangeCursorMode(false, CursorLockMode.None);
+
+        }
         private void ClearInit() { }
-        private void GameOverInit() { }
+        private void GameOverInit()
+        {
+            ChangeCursorMode(true, CursorLockMode.None);
+        }
         private void MenuInit() { }
 
 

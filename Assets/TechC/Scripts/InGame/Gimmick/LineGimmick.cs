@@ -75,6 +75,9 @@ namespace TechC
 
         public void ShotGimmick(ObjType type, float speed, int initPointNum, Vector2 direction, int colorColumn, bool isRandomColor)
         {
+          
+
+            // 通常の処理
             switch (type)
             {
                 case ObjType.Line:
@@ -85,6 +88,7 @@ namespace TechC
                     break;
             }
 
+            // カラー設定の処理（既存コード）
             SetColor setColor = lastObj?.GetComponent<SetColor>();
             if (setColor == null || colorPalette == null || colorPalette.colors.Count == 0) return;
 
@@ -101,11 +105,21 @@ namespace TechC
             }
             else
             {
-                // 有効なインデックス範囲を取得
-                int maxColorIndex = Mathf.Min(
-                    levelCollection.levels[GameManager.I.GetCurrentLevel() - 1].activeColor,
-                    colorPalette.colors[GameManager.I.colorRow].colors.Count - 1
-                );
+                int maxColorIndex = 0;
+                // 現在のレベルが5以上かチェック
+                if (GameManager.I.GetCurrentLevel() > 5)
+                {
+                    maxColorIndex = Mathf.Min(
+                levelCollection.levels[4].activeColor,
+                colorPalette.colors[GameManager.I.colorRow].colors.Count - 1);
+                }
+                else
+                {
+                    maxColorIndex = Mathf.Min(
+                levelCollection.levels[GameManager.I.GetCurrentLevel() - 1].activeColor,
+                colorPalette.colors[GameManager.I.colorRow].colors.Count - 1);
+                }
+
 
                 if (maxColorIndex < 0)
                 {
@@ -113,11 +127,13 @@ namespace TechC
                     return;
                 }
 
-                // ランダムインデックスを生成
                 int randomIndex = Random.Range(0, maxColorIndex + 1);
                 setColor.SetColorPalette(GameManager.I.colorRow, randomIndex);
             }
         }
+
+ 
+
 
         private bool IsValidColorIndex(int row, int column)
         {
