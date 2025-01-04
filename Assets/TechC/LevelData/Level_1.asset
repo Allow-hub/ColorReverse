@@ -14,25 +14,61 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelName: Level_1
   activeColor: 1
+  lastDuration: 5
   gimmicks:
   - type: 0
-    speed: 300
-    initPointNum: 3
-    direction: {x: 1, y: 1}
-    isRandomColor: 1
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
     delay: 0
-    colorColumn: 1
+    colorColumn: 0
   - type: 0
-    speed: 300
-    initPointNum: 0
-    direction: {x: -1, y: -1}
-    isRandomColor: 1
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 0
+  - type: 0
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 0
+  - type: 0
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
     delay: 0.5
     colorColumn: 1
   - type: 0
-    speed: 300
+    speed: 400
     initPointNum: 4
     direction: {x: 0, y: -1}
-    isRandomColor: 1
-    delay: 1
+    isRandomColor: 0
+    delay: 1.5
+    colorColumn: 1
+  - type: 0
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 1
+  - type: 0
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
     colorColumn: 0
+  - type: 0
+    speed: 400
+    initPointNum: 4
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 1

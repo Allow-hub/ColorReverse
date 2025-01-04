@@ -27,6 +27,7 @@ namespace TechC
 
         [SerializeField] private float expandSize =1.5f;    
         [SerializeField] private Vector2 radiusRange = new Vector2(10, 100);
+        [SerializeField] private GameObject effect;
         //private List<GameObject> scoreText=new List<GameObject>();
         //private const int scoreTextIndex = 0;
         private GameObject lastHitObject = null;
@@ -59,6 +60,7 @@ namespace TechC
 
         private void Awake()
         {
+            effect.SetActive(false);
             gameOverCanvas.SetActive(false);
 
             // カスタムカーソルを設定
@@ -247,11 +249,11 @@ namespace TechC
                 // 重複追加を防ぐ（既にリストに存在する場合は処理しない）
                 if (hitObjects.Contains(other.gameObject)) return;
                 SetColor setColor = other.GetComponent<SetColor>();
+                setColor.StartDisable();
                 int colorColumn = setColor.GetPaletteColumn();
 
                 if(colorColumn == currentColorColumn)
                 {
-
                     hitObjects.Add(other.gameObject);
                     StartCoroutine(ScaleMouseObj());
 
@@ -260,6 +262,7 @@ namespace TechC
                 }
                 else
                 {
+                    StartCoroutine(ActiveEffect());
                     hitObjects.Add(other.gameObject);
                     gameOverCanvas.SetActive(true);
                     GameManager.I.ChangeGameOverState();
@@ -300,7 +303,7 @@ namespace TechC
             Vector3 targetScale = originalScale * expandSize;  // 目標のスケール
 
             float elapsedTime = 0f;
-            float scaleDuration = 0.3f;  // 変化時間（0.5秒）
+            float scaleDuration = 0.2f;  // 変化時間
 
             // スケールアップ処理
             while (elapsedTime < scaleDuration)
@@ -323,6 +326,13 @@ namespace TechC
             mouseObj.transform.localScale = originalScale; // 元のスケールに戻す
 
             isScaling = false; // アニメーション終了後、新たなアクションを可能にする
+        }
+
+        private IEnumerator ActiveEffect()
+        {
+            effect.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            effect.SetActive(false);
         }
 
     }

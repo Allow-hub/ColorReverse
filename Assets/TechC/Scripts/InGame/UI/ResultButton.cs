@@ -10,6 +10,7 @@ namespace TechC
     {
         [SerializeField] private Button titleButton, retryButton;
         [SerializeField] private Color color;
+        [SerializeField] private TextMeshProUGUI scoreText;
         [SerializeField] private TextMeshProUGUI titleText, retryText;
 
         private void Awake()
@@ -18,9 +19,14 @@ namespace TechC
             retryButton.onClick.AddListener(() => OnRetry());   
         }
 
+        private void OnEnable()
+        {
+            scoreText.text ="Score : "+ GameManager.I.GetScore().ToString();
+        }
 
         private void OnTitle()
         {
+            GameManager.I.ResetScore();
             GameManager.I.LoadSceneAsync(0);
             titleText.color = color;
             GameManager.I.ChangeTitleState();
@@ -28,6 +34,8 @@ namespace TechC
         }
         private void OnRetry()
         {
+            GameManager.I.ResetScore();
+
             GameManager.I.LoadSceneAsync(1);
             retryText.color = color;
             GameManager.I.ChangePlayModeState();

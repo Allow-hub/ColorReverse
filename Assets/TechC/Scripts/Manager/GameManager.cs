@@ -127,6 +127,7 @@ namespace TechC
         private void ClearInit() { }
         private void GameOverInit()
         {
+            currentLevel= 1;
             ChangeCursorMode(true, CursorLockMode.None);
         }
         private void MenuInit() { }
@@ -170,6 +171,7 @@ namespace TechC
             }
         }
 
+        public void  ResetScore()=>score = 0;
         public void ChangeTitleState() => SetState(GameState.Title);
         public void ChangeMenuState() => SetState(GameState.Menu);
         public void ChangePlayModeState() => SetState(GameState.PlayMode);

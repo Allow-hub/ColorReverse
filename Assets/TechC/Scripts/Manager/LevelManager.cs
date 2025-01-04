@@ -154,11 +154,14 @@ namespace TechC
                 );
 
                 gimmickCounter++;
-                Debug.Log($"Gimmick triggered. Count: {gimmickCounter}");
+                //Debug.Log($"Gimmick triggered. Count: {gimmickCounter}");
             }
 
-            yield return new WaitForSeconds(5f);
-            Debug.Log($"Total gimmicks triggered: {gimmickCounter}");
+            if (currentLevel == Level.AfterLevel_5)
+                yield return new WaitForSeconds(levelCollection.levels[4].lastDuration);
+            else
+                yield return new WaitForSeconds(levelCollection.levels[GameManager.I.GetCurrentLevel() - 1].lastDuration);
+            //Debug.Log($"Total gimmicks triggered: {gimmickCounter}");
             lineGimmick.InitGimmick();
             MoveToNextState();
         }
@@ -320,13 +323,13 @@ namespace TechC
             }
         }
 
-       
+
 
 
         private void SetActiveColors()
         {
             activeColor.Clear();
-            for (int i = 0; i < levelCollection.levels[GameManager.I.GetCurrentLevel()-1].activeColor+1; i++)
+            for (int i = 0; i < levelCollection.levels[GameManager.I.GetCurrentLevel() - 1].activeColor + 1; i++)
             {
                 activeColor.Add(new Vector2(paletteRow, i));
             }

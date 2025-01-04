@@ -1,3 +1,4 @@
+using Coffee.UIEffects;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace TechC
     public class SetColor : MonoBehaviour
     {
         [SerializeField] private ColorPalette palette;
+        [SerializeField] protected UIEffect uiEffect;
 
         [SerializeField] private int paletteRow = 0; 
         [SerializeField] private int paletteColumn = 0;
@@ -17,12 +19,16 @@ namespace TechC
         private RectTransform rect;
         private BoxCollider boxCollider;
         private Image image;
+        private float duration = 1;        
 
         private void Awake ()
         {
             palette = FindAnyObjectByType<ColorPalette>();
             rect = GetComponent<RectTransform>();
             image = GetComponent<Image>();
+            if (uiEffect != null)
+                uiEffect.transitionRate = 0;
+
         }
         private void Start()
         {
@@ -40,6 +46,7 @@ namespace TechC
             image.color = palette.colors[paletteRow].colors[paletteColumn];
 
             boxCollider = GetComponent<BoxCollider>();
+            if(boxCollider == null) return;
             rect = GetComponent<RectTransform>();
             if (canHit)
                 boxCollider.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, colZSize);
@@ -64,6 +71,20 @@ namespace TechC
             image.color = palette.colors[paletteRow].colors[paletteColumn];
         }
 
+        public void StartDisable() => StartCoroutine(DisableEffect());
+
+        private IEnumerator DisableEffect()
+        {
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                uiEffect.transitionRate = Mathf.Lerp(0f, 1f, elapsed / duration); // 0から1へ補間
+                elapsed += Time.deltaTime; // 経過時間を更新
+                yield return null;         // 次のフレームまで待機
+            }
+            uiEffect.transitionRate = 1;
+        }
 
         //public void SetColors(Color col)
         //{

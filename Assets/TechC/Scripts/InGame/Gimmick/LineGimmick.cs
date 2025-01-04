@@ -211,39 +211,47 @@ namespace TechC
         /// <param name="initPointNum"></param>
         private void CircleMove(float speed, int initPointNum)
         {
-            //if (initPointNum < 0 || initPointNum >= points.Length || initPointNum >= circlesObj.Length) return;
-
             GameObject circle = objectPool.GetObject(circleObj);
-            //circleIndex++;  
             if (circle == null) return;
 
-            // オブジェクトを再利用
-            //circle.SetActive(true);
             circle.transform.position = points[initPointNum].position;
 
             activeObj.Add(circle);
             lastObj = circle;
 
             RectTransform rect = circle.GetComponent<RectTransform>();
+            CapsuleCollider capsuleCollider = circle.GetComponent<CapsuleCollider>();  // カプセルコライダーの取得
+
             if (rect != null)
             {
-                // サイズを初期化
                 rect.sizeDelta = circleInitSize;
-                StartCoroutine(ExpandCircle(rect, speed));
+
+                if (capsuleCollider != null)
+                {
+                    capsuleCollider.radius = circleInitSize.x / 2;  // 初期サイズに合わせて設定
+                }
+
+                StartCoroutine(ExpandCircle(rect, capsuleCollider, speed));
             }
         }
 
-
-        private IEnumerator ExpandCircle(RectTransform rect, float speed)
+        private IEnumerator ExpandCircle(RectTransform rect, CapsuleCollider capsuleCollider, float speed)
         {
             Vector2 currentSize = circleInitSize;
             while (rect.gameObject.activeSelf)
             {
                 currentSize += Vector2.one * speed * Time.deltaTime;
                 rect.sizeDelta = currentSize;
+
+                if (capsuleCollider != null)
+                {
+                    capsuleCollider.radius = currentSize.x / 2;  // 半径を幅の半分に更新
+                }
+
                 yield return null;
             }
         }
+
 
         private void SetRotation(GameObject obj,Vector2 direction)
         {

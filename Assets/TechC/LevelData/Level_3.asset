@@ -14,11 +14,82 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelName: Level_3
   activeColor: 2
+  lastDuration: 4
   gimmicks:
   - type: 1
-    speed: 300
-    initPointNum: 4
+    speed: 800
+    initPointNum: 2
     direction: {x: 0, y: -1}
-    isRandomColor: 1
+    isRandomColor: 0
     delay: 0
+    colorColumn: 2
+  - type: 1
+    speed: 800
+    initPointNum: 0
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 0
+  - type: 1
+    speed: 800
+    initPointNum: 2
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 1
+  - type: 1
+    speed: 900
+    initPointNum: 0
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 1.5
+    colorColumn: 2
+  - type: 1
+    speed: 800
+    initPointNum: 2
+    direction: {x: 0, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 2
+  - type: 0
+    speed: 500
+    initPointNum: 3
+    direction: {x: 1, y: 1}
+    isRandomColor: 0
+    delay: 4
+    colorColumn: 2
+  - type: 0
+    speed: 500
+    initPointNum: 1
+    direction: {x: -1, y: 1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 1
+  - type: 0
+    speed: 500
+    initPointNum: 3
+    direction: {x: 1, y: 1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 1
+  - type: 0
+    speed: 500
+    initPointNum: 1
+    direction: {x: -1, y: 1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 1
+  - type: 0
+    speed: 500
+    initPointNum: 0
+    direction: {x: -1, y: -1}
+    isRandomColor: 0
+    delay: 0.5
+    colorColumn: 0
+  - type: 0
+    speed: 500
+    initPointNum: 2
+    direction: {x: 1, y: -1}
+    isRandomColor: 0
+    delay: 0.5
     colorColumn: 1

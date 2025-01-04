@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc54ae13bcf59d34e82182a310a05f26, type: 3}
-  m_Name: Level_5
+  m_Name: Level_5 1
   m_EditorClassIdentifier: 
   levelName: Level_5
   activeColor: 6
@@ -20,55 +20,55 @@ MonoBehaviour:
     speed: 900
     initPointNum: 2
     direction: {x: 0, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0
     colorColumn: 1
   - type: 1
     speed: 900
     initPointNum: 5
     direction: {x: 0, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0.5
     colorColumn: 6
   - type: 1
     speed: 900
     initPointNum: 3
     direction: {x: 0, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0.5
     colorColumn: 6
   - type: 0
     speed: 500
     initPointNum: 0
     direction: {x: -1, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 1.5
     colorColumn: 1
   - type: 0
     speed: 500
     initPointNum: 0
     direction: {x: -1, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0.5
     colorColumn: 2
   - type: 0
     speed: 500
     initPointNum: 0
     direction: {x: -1, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0.3
     colorColumn: 3
   - type: 1
     speed: 900
     initPointNum: 0
     direction: {x: -1, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0.3
     colorColumn: 5
   - type: 1
     speed: 900
     initPointNum: 0
     direction: {x: -1, y: -1}
-    isRandomColor: 0
+    isRandomColor: 1
     delay: 0.8
     colorColumn: 4

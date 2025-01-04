@@ -22,6 +22,7 @@ namespace TechC
     {
         public string levelName;                // レベル名
         public int activeColor;
+        public float lastDuration;
         public GimmickData[] gimmicks;          // ギミックの配列
     }
 
