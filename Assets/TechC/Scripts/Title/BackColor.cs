@@ -21,6 +21,11 @@ namespace TechC
 
         }
 
+        private void Awake()
+        {
+            image = GetComponent<Image>();
+        }
+
         private void Update()
         {
             if (GameManager.I.colorRow == lastColorRow) return;

@@ -38,22 +38,23 @@ namespace TechC
 
         private void Awake()
         {
-            lastLevel = 0;    
-            // ResourcesフォルダからScriptableObjectをロード
-            levelCollection = Resources.Load<LevelCollection>("LevelCollection");
+            lastLevel = 0;
+            
+        }
+        private void Start()
+        {
+            if (GameManager.I == null) return;
+            paletteRow = GameManager.I.colorRow;
+            levelCollection = GameManager.I.levelCollection;
 
             if (levelCollection == null)
             {
                 Debug.LogError("LevelCollection could not be loaded from Resources.");
             }
         }
-        private void Start()
-        {
-            if (GameManager.I == null) return;
-            paletteRow = GameManager.I.colorRow;
-        }
         private void Update()
         {
+            if (levelCollection == null) return;
             if (GameManager.I.currentState == GameManager.GameState.GameOver)
             {
                 StopAllCoroutines();

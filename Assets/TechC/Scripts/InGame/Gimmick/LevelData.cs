@@ -8,42 +8,35 @@ namespace TechC
     [System.Serializable]
     public class GimmickData
     {
-        public LineGimmick.ObjType type; // ギミックの種類 (Line or Circle)
-        public float speed;             // ギミックの速度
-        public int initPointNum;        // 初期ポイント番号
-        public Vector2 direction;       // 移動方向
-        public bool isRandomColor;      // ランダム色にするか
-        public float delay;             // ギミック開始までの遅延時間
-        public int colorColumn;         // ギミックの色
+        public LineGimmick.ObjType type;
+        public float speed;
+        public int initPointNum;
+        public Vector2 direction;
+        public bool isRandomColor;
+        public float delay;
+        public int colorColumn;
     }
 
     [CreateAssetMenu(fileName = "LevelData", menuName = "Gimmick/LevelData", order = 1)]
     public class LevelData : ScriptableObject
     {
-        public string levelName;                // レベル名
+        public string levelName;
         public int activeColor;
         public float lastDuration;
-        public GimmickData[] gimmicks;          // ギミックの配列
+        public GimmickData[] gimmicks;
     }
 
-    [CreateAssetMenu(fileName = "LevelCollection", menuName = "Gimmick/LevelCollection", order = 2)]
-    public class LevelCollection : ScriptableObject
-    {
-        public LevelData[] levels; // レベルデータの配列
-    }
+
+#if UNITY_EDITOR
 
     [CustomEditor(typeof(LevelData))]
     public class LevelDataEditor : Editor
     {
         public override void OnInspectorGUI()
         {
-            // ベースクラスのインスペクターGUIを表示
             base.OnInspectorGUI();
-
-            // LevelDataターゲット取得
             LevelData levelData = (LevelData)target;
 
-            // 選択肢を用意 (activeColor の最大値まで)
             int maxColors = levelData.activeColor + 1;
             string[] options = new string[maxColors];
             for (int i = 0; i < maxColors; i++)
@@ -51,10 +44,8 @@ namespace TechC
                 options[i] = i.ToString();
             }
 
-            // activeColorの選択 (プルダウン)
             levelData.activeColor = EditorGUILayout.IntPopup("Active Color", levelData.activeColor, options, GetIntArray(maxColors));
 
-            // gimmicks 配列内の colorColumn のプルダウン表示
             if (levelData.gimmicks != null && levelData.gimmicks.Length > 0)
             {
                 EditorGUILayout.LabelField("Gimmicks", EditorStyles.boldLabel);
@@ -70,7 +61,6 @@ namespace TechC
                 }
             }
 
-            // データが変更されたことをUnityに通知
             if (GUI.changed)
             {
                 EditorUtility.SetDirty(levelData);
@@ -87,4 +77,5 @@ namespace TechC
             return array;
         }
     }
+#endif
 }

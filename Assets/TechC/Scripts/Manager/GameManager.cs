@@ -19,6 +19,7 @@ namespace TechC
 
         [SerializeField] private int targetFrameRate = 144;
 
+        public   LevelCollection    levelCollection;    
         public int colorRow = 0;
 
         private int currentLevel;
@@ -39,7 +40,7 @@ namespace TechC
 
             // VSyncCount ‚ğ Dont Sync ‚É•ÏX
             QualitySettings.vSyncCount = 0;
-
+            //levelCollection= Resources.Load<LevelCollection>("LevelCollection");
             // fps 144 ‚ğ–Ú•W‚Éİ’è
             Application.targetFrameRate = targetFrameRate;
             SetState(GameState.Title);

@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: f362be0f27d5d5446a4a30f91bb597cd, type: 3}
   m_Name: LevelCollection
-  m_EditorClassIdentifier: Assembly-CSharp:TechC:LevelCollection
+  m_EditorClassIdentifier: 
   levels:
   - {fileID: 11400000, guid: bcb0d676edbb0d142bcf4ab7d3cb8fc8, type: 2}
   - {fileID: 11400000, guid: 9c0dd9e306a2d794fb19f8479fc310b0, type: 2}

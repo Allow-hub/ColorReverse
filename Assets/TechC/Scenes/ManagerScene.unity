@@ -158,6 +158,7 @@ MonoBehaviour:
   maxLevel: 5
   score: 0
   targetFrameRate: 144
+  levelCollection: {fileID: 11400000, guid: 45f357980262cf14b8439b79094596ed, type: 2}
   colorRow: 1
   currentState: 0
 --- !u!4 &387439465
