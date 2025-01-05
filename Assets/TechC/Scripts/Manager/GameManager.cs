@@ -9,7 +9,7 @@ namespace TechC
     {
         [Header("Reference")]
         [SerializeField] private LevelManager levelManager;
-
+        [SerializeField] private FadeManager fadeManager;
 
         [Header("GameSettings")]
         [SerializeField] private int life = 3;
@@ -42,7 +42,7 @@ namespace TechC
 
             // fps 144 ‚ð–Ú•W‚ÉÝ’è
             Application.targetFrameRate = targetFrameRate;
-            SetState(GameState.NextLevel);
+            SetState(GameState.Title);
         }
 
         private void Update()
@@ -111,7 +111,7 @@ namespace TechC
         private void TitleInit()
         {
             ChangeCursorMode(true, CursorLockMode.None);
-
+            currentLevel = 1;
             score = 0;  
         }
         private void NextLevelInit()
@@ -171,6 +171,7 @@ namespace TechC
             }
         }
 
+        public void ShotFade(float duration)=>fadeManager.StartFade(duration);    
         public void  ResetScore()=>score = 0;
         public void ChangeTitleState() => SetState(GameState.Title);
         public void ChangeMenuState() => SetState(GameState.Menu);

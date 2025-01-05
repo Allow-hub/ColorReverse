@@ -18,7 +18,6 @@ namespace TechC
         private void OnEnable()
         {
             anim.SetTrigger(animTriggerName);
-
         }
 
 

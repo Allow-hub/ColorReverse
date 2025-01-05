@@ -265,6 +265,7 @@ namespace TechC
                     StartCoroutine(ActiveEffect());
                     hitObjects.Add(other.gameObject);
                     gameOverCanvas.SetActive(true);
+                    SeManager.I.PlaySE(2);
                     GameManager.I.ChangeGameOverState();
                 }
             }

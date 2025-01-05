@@ -75,8 +75,8 @@ namespace TechC
 
         public void ShotGimmick(ObjType type, float speed, int initPointNum, Vector2 direction, int colorColumn, bool isRandomColor)
         {
-          
 
+            SeManager.I.PlaySE(1);
             // ’Êí‚Ìˆ—
             switch (type)
             {

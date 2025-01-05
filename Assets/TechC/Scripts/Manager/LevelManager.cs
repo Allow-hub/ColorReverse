@@ -38,7 +38,14 @@ namespace TechC
 
         private void Awake()
         {
-            lastLevel = 0;
+            lastLevel = 0;    
+            // ResourcesフォルダからScriptableObjectをロード
+            levelCollection = Resources.Load<LevelCollection>("LevelCollection");
+
+            if (levelCollection == null)
+            {
+                Debug.LogError("LevelCollection could not be loaded from Resources.");
+            }
         }
         private void Start()
         {
@@ -250,7 +257,8 @@ namespace TechC
 
         private void SetActiveColors(int startColumn, int count)
         {
-            activeColor.Clear();
+            if (activeColor != null)
+                activeColor.Clear();
             for (int i = 0; i < count; i++)
             {
                 activeColor.Add(new Vector2(paletteRow, startColumn + i));
@@ -325,15 +333,29 @@ namespace TechC
 
 
 
-
         private void SetActiveColors()
         {
             activeColor.Clear();
-            for (int i = 0; i < levelCollection.levels[GameManager.I.GetCurrentLevel() - 1].activeColor + 1; i++)
+
+            if (GameManager.I == null)
+            {
+                Debug.LogError("GameManager is not initialized.");
+                return;
+            }
+
+            int currentLevel = GameManager.I.GetCurrentLevel() - 1;
+            if (levelCollection == null || levelCollection.levels == null || currentLevel < 0 || currentLevel >= levelCollection.levels.Length)
+            {
+                Debug.LogError("LevelCollection or levels array is not properly set.");
+                return;
+            }
+
+            for (int i = 0; i < levelCollection.levels[currentLevel].activeColor + 1; i++)
             {
                 activeColor.Add(new Vector2(paletteRow, i));
             }
         }
+
         public List<float> GetActiveColorYs()
         {
             List<float> yValues = new List<float>();
